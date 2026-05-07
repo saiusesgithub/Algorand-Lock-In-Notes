@@ -1,0 +1,75 @@
+#pragma version 11
+#pragma typetrack false
+
+// algopy.arc4.ARC4Contract.approval_program() -> uint64:
+main:
+    intcblock 0 1
+    bytecblock "counter"
+    txn ApplicationID
+    bnz main_after_if_else@2
+    // smart_contracts/counter/contract.py:7
+    // self.counter = UInt64(0)
+    bytec_0 // "counter"
+    intc_0 // 0
+    app_global_put
+
+main_after_if_else@2:
+    // smart_contracts/counter/contract.py:4
+    // class Counter(ARC4Contract):
+    txn NumAppArgs
+    bz main___algopy_default_create@11
+    txn OnCompletion
+    !
+    assert
+    txn ApplicationID
+    assert
+    pushbytess 0x2fa47328 0x755f9589 // method "increment()void", method "get_count()uint64"
+    txna ApplicationArgs 0
+    match increment get_count
+    err
+
+main___algopy_default_create@11:
+    txn OnCompletion
+    !
+    txn ApplicationID
+    !
+    &&
+    return
+
+
+// smart_contracts.counter.contract.Counter.increment[routing]() -> void:
+increment:
+    // smart_contracts/counter/contract.py:11
+    // self.counter += UInt64(1)
+    intc_0 // 0
+    bytec_0 // "counter"
+    app_global_get_ex
+    assert // check self.counter exists
+    intc_1 // 1
+    +
+    bytec_0 // "counter"
+    swap
+    app_global_put
+    // smart_contracts/counter/contract.py:9
+    // @abimethod()
+    intc_1 // 1
+    return
+
+
+// smart_contracts.counter.contract.Counter.get_count[routing]() -> void:
+get_count:
+    // smart_contracts/counter/contract.py:15
+    // return self.counter
+    intc_0 // 0
+    bytec_0 // "counter"
+    app_global_get_ex
+    assert // check self.counter exists
+    // smart_contracts/counter/contract.py:13
+    // @abimethod()
+    itob
+    pushbytes 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
